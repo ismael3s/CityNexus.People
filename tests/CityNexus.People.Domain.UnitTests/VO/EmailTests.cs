@@ -1,0 +1,19 @@
+using CityNexus.People.Domain.VO;
+
+namespace CityNexus.People.Domain.UnitTests.VO;
+
+public sealed class EmailTests
+{
+    [Theory]
+    [Trait("Email - Unit Tests", "When invalid email is provided, should throw an exception")]
+    [InlineData(null)]
+    [InlineData("ismael@  ")]
+    [InlineData("ismael123.com")]
+    [InlineData("TEST@!@@##!.COM")]
+    public void Email_Create_WhenAnInvalidEmail_ShouldThrowAnException(string value)
+    {
+        var action = () => Email.Create(value);
+
+        action.Should().Throw<Exception>().WithMessage("Invalid email address.");
+    }
+}
