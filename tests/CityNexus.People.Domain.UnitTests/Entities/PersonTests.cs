@@ -1,10 +1,9 @@
+using CityNexus.People.Domain.Entities;
 using CityNexus.People.Domain.VO;
 
 namespace CityNexus.People.Domain.UnitTests.Entities;
 
-using SUT = CityNexus.People.Domain.Entities.People;
-
-public sealed class PeopleTests
+public sealed class PersonTests
 {
     [Theory]
     [Trait("People - Unit", "Shouldn't be able to create a person when invalid is provided")]
@@ -18,7 +17,7 @@ public sealed class PeopleTests
         string document
     )
     {
-        var action = () => SUT.Create(name, email, document);
+        var action = () => Person.Create(name, email, document);
 
         action.Should().Throw<Exception>();
     }
@@ -33,7 +32,7 @@ public sealed class PeopleTests
         string document
     )
     {
-        var action = () => SUT.Create(name, email, document);
+        var action = () => Person.Create(name, email, document);
 
         action.Should().NotThrow();
         var person = action();

@@ -2,7 +2,7 @@ using CityNexus.People.Domain.VO;
 
 namespace CityNexus.People.Domain.Entities;
 
-public sealed class People
+public sealed class Person
 {
     public Guid Id { get; private set; }
 
@@ -14,13 +14,13 @@ public sealed class People
 
     public DateTime UpdatedAt { get; private set; }
 
-    private People() { }
+    private Person() { }
 
-    public static People Create(string fullName, string anEmail, string cpf)
+    public static Person Create(string fullName, string anEmail, string cpf)
     {
         var document = Document.Create(cpf);
         var email = Email.Create(anEmail);
-        var people = new People
+        var people = new Person
         {
             Id = Guid.NewGuid(),
             Name = Name.From(fullName),
