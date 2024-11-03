@@ -12,13 +12,14 @@ public sealed record Document(string Value, DocumentType Type)
         var document = new Document(value, type);
         if (!IsAValidCpf(value))
         {
-            throw new Exception($"Invalid Cpf value: {value}"); 
+            throw new Exception($"The CPF is invalid"); 
         }
         return document;
     }
 
-    private static bool IsAValidCpf(string cpf)
+    private static bool IsAValidCpf(string? cpf)
     {
+        if (string.IsNullOrEmpty(cpf)) return false;
         int[] multiplier = [10, 9, 8, 7, 6, 5, 4, 3, 2];
         int[] secondMultiplier = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
         cpf = cpf.Trim()
