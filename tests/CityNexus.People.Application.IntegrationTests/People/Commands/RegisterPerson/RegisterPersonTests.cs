@@ -20,12 +20,7 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
 
     public Task InitializeAsync() => Task.CompletedTask;
 
-    [Fact]
-    [Trait(
-        "CreatePersonCommand - Integration",
-        "Shouldn't be able to create a person when the provided data is invalid"
-    )]
-    public async Task Should_Throw_Validation_Failed_Exception_When_Invalid_Data()
+    private async Task<(RegisterPersonCommand, ApplicationDbContext)> MakeSut()
     {
         var applicationDbContext = new ApplicationDbContext(
             new DbContextOptionsBuilder()
@@ -36,8 +31,19 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
         await applicationDbContext.Database.EnsureCreatedAsync();
         var unitOfWork = new UnitOfWork(applicationDbContext);
         var personRepository = new PersonRepository(applicationDbContext);
-
         var sut = new RegisterPersonCommand(personRepository, unitOfWork);
+        return (sut, applicationDbContext);
+    }
+
+    [Fact]
+    [Trait(
+        "CreatePersonCommand - Integration",
+        "Shouldn't be able to create a person when the provided data is invalid"
+    )]
+    public async Task Should_Throw_Validation_Failed_Exception_When_Invalid_Data()
+    {
+        var (sut, _) = await MakeSut();
+
         var input = new RegisterPersonCommand.Input("Ismael Souza", "ismael@gmail.com", null!);
 
         var action = () => sut.Handle(input, CancellationToken.None);
@@ -52,20 +58,11 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
     )]
     public async Task ShouldThrow_WhenDocumentIsAlreadyInUse()
     {
-        var applicationDbContext = new ApplicationDbContext(
-            new DbContextOptionsBuilder()
-                .UseSnakeCaseNamingConvention()
-                .UseNpgsql(setup.ConnectionString)
-                .Options
-        );
-        await applicationDbContext.Database.EnsureCreatedAsync();
-        var unitOfWork = new UnitOfWork(applicationDbContext);
-        var personRepository = new PersonRepository(applicationDbContext);
+        var (sut, applicationDbContext) = await MakeSut();
         var person = Person.Create("Ismael Souza", "ismael@gmail.com", "57075723090");
         applicationDbContext.People.Add(person);
         await applicationDbContext.SaveChangesAsync();
 
-        var sut = new RegisterPersonCommand(personRepository, unitOfWork);
         var input = new RegisterPersonCommand.Input(
             "Ismael Souza",
             "ismael@gmail.com",
@@ -84,20 +81,10 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
     )]
     public async Task ShouldThrow_WhenEmailIsAlreadyInUse()
     {
-        var applicationDbContext = new ApplicationDbContext(
-            new DbContextOptionsBuilder()
-                .UseSnakeCaseNamingConvention()
-                .UseNpgsql(setup.ConnectionString)
-                .Options
-        );
-        await applicationDbContext.Database.EnsureCreatedAsync();
-        var unitOfWork = new UnitOfWork(applicationDbContext);
-        var personRepository = new PersonRepository(applicationDbContext);
+        var (sut, applicationDbContext) = await MakeSut();
         var person = Person.Create("Ismael Souza", "ismael@gmail.com", "57075723090");
         applicationDbContext.People.Add(person);
         await applicationDbContext.SaveChangesAsync();
-
-        var sut = new RegisterPersonCommand(personRepository, unitOfWork);
         var input = new RegisterPersonCommand.Input(
             "Ismael Souza",
             "ismael@gmail.com",
@@ -116,17 +103,7 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
     )]
     public async Task ShouldBeAbleToRegisterAPersonIntoTheNexus()
     {
-        var applicationDbContext = new ApplicationDbContext(
-            new DbContextOptionsBuilder()
-                .UseSnakeCaseNamingConvention()
-                .UseNpgsql(setup.ConnectionString)
-                .Options
-        );
-        await applicationDbContext.Database.EnsureCreatedAsync();
-        var unitOfWork = new UnitOfWork(applicationDbContext);
-        var personRepository = new PersonRepository(applicationDbContext);
-
-        var sut = new RegisterPersonCommand(personRepository, unitOfWork);
+        var (sut, applicationDbContext) = await MakeSut();
         var input = new RegisterPersonCommand.Input(
             "Ismael Souza",
             "ismael@gmail.com",
