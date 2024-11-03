@@ -1,0 +1,6 @@
+@CityNexus.Api_HostAddress = http://localhost:5128
+
+GET {{CityNexus.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -5,15 +5,15 @@ public enum DocumentType
     Cpf = 1,
 }
 
-public sealed record Document(string Value, DocumentType Type)
+public sealed record Document(string Value)
 {
-    public static Document Create(string value, DocumentType type = DocumentType.Cpf)
+    public static Document Create(string value)
     {
         if (!IsAValidCpf(value))
         {
             throw new Exception("The CPF is invalid");
         }
-        var document = new Document(value.Trim().Replace(".", "").Replace("-", ""), type);
+        var document = new Document(value.Trim().Replace(".", "").Replace("-", ""));
         return document;
     }
 
