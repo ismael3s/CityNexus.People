@@ -1,4 +1,5 @@
 using CityNexus.People.Domain.Entities;
+using CityNexus.People.Domain.People;
 using CityNexus.People.Domain.VO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

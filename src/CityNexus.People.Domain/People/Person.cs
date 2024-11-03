@@ -1,17 +1,16 @@
+using CityNexus.People.Domain.Abstractions;
+using CityNexus.People.Domain.People.Events;
 using CityNexus.People.Domain.VO;
 
-namespace CityNexus.People.Domain.Entities;
+namespace CityNexus.People.Domain.People;
 
-public sealed class Person
+public sealed class Person : Entity
 {
-    public Guid Id { get; private set; }
-
     public Name Name { get; private set; } = default!;
     public Document Document { get; private set; } = default!;
     public Email Email { get; private set; } = default!;
 
     public DateTime CreatedAt { get; private set; }
-
     public DateTime UpdatedAt { get; private set; }
 
     private Person() { }
@@ -20,7 +19,7 @@ public sealed class Person
     {
         var document = Document.Create(cpf);
         var email = Email.Create(anEmail);
-        var people = new Person
+        var person = new Person
         {
             Id = Guid.NewGuid(),
             Name = Name.From(fullName),
@@ -29,6 +28,7 @@ public sealed class Person
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
-        return people;
+        person.RaiseDomainEvent(new RegisteredPersonDomainEvent(person.Id));
+        return person;
     }
 }

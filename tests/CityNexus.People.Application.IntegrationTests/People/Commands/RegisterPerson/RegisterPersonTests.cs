@@ -1,6 +1,9 @@
+using System.Text.Json;
 using CityNexus.People.Application.IntegrationTests.Common;
 using CityNexus.People.Application.People.Commands.RegisterPerson;
 using CityNexus.People.Domain.Entities;
+using CityNexus.People.Domain.People;
+using CityNexus.People.Domain.People.Events;
 using CityNexus.People.Infra.Database.EF;
 using CityNexus.People.Infra.Database.EF.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -139,5 +142,20 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
         person.Name.Value.Should().Be("Ismael Souza");
         person.Email.Value.Should().Be("ismael@gmail.com");
         person.Document.Value.Should().Be("57075723090");
+
+        var outboxEvents = await applicationDbContext.Outbox.ToListAsync();
+        outboxEvents.Should().HaveCount(1);
+        var outboxEvent = outboxEvents[0];
+        outboxEvent.Id.Should().NotBeEmpty();
+        outboxEvent.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMilliseconds(1000));
+        outboxEvent.EventName.Should().Be(nameof(RegisteredPersonDomainEvent));
+        outboxEvent
+            .Payload.Should()
+            .Be(
+                JsonSerializer.Serialize(
+                    new RegisteredPersonDomainEvent(person.Id),
+                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                )
+            );
     }
 }

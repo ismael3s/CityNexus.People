@@ -1,5 +1,6 @@
 using CityNexus.People.Application.People.Repositories;
 using CityNexus.People.Domain.Entities;
+using CityNexus.People.Domain.People;
 using CityNexus.People.Domain.VO;
 using Microsoft.EntityFrameworkCore;
 

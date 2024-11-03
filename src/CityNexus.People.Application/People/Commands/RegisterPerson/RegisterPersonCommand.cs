@@ -1,6 +1,6 @@
 using CityNexus.People.Application.People.Gateways;
 using CityNexus.People.Application.People.Repositories;
-using CityNexus.People.Domain.Entities;
+using CityNexus.People.Domain.People;
 
 namespace CityNexus.People.Application.People.Commands.RegisterPerson;
 
