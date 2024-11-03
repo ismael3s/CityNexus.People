@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\CityNexus.People.Domain\CityNexus.People.Domain.csproj" />
+      <ProjectReference Include="..\..\src\CityNexus.People.Domain\CityNexus.People.Domain.csproj" />
     </ItemGroup>
 
 </Project>
