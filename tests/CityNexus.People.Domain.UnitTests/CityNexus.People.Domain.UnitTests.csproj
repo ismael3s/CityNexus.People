@@ -26,5 +26,4 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\CityNexus.People.Domain\CityNexus.People.Domain.csproj" />
     </ItemGroup>
-
 </Project>

@@ -11,7 +11,7 @@ public sealed record Document(string Value, DocumentType Type)
     {
         if (!IsAValidCpf(value))
         {
-            throw new Exception($"The CPF is invalid");
+            throw new Exception("The CPF is invalid");
         }
         var document = new Document(value.Trim().Replace(".", "").Replace("-", ""), type);
         return document;

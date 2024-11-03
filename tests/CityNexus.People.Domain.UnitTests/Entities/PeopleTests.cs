@@ -1,3 +1,5 @@
+using CityNexus.People.Domain.VO;
+
 namespace CityNexus.People.Domain.UnitTests.Entities;
 
 using SUT = CityNexus.People.Domain.Entities.People;
@@ -5,7 +7,7 @@ using SUT = CityNexus.People.Domain.Entities.People;
 public sealed class PeopleTests
 {
     [Theory]
-    [Trait("People - Unit", "Shouldn't be able to create a people when invalid is provided")]
+    [Trait("People - Unit", "Shouldn't be able to create a person when invalid is provided")]
     [InlineData(null, null, null)]
     [InlineData("Ismael Santana", null, null)]
     [InlineData("Ismael Santana", "ismael.santana@dev.com", null)]
@@ -19,5 +21,26 @@ public sealed class PeopleTests
         var action = () => SUT.Create(name, email, document);
 
         action.Should().Throw<Exception>();
+    }
+
+    [Theory]
+    [Trait("People - Unit", "Should be Able to create a person when valid data is provided")]
+    [InlineData("Ismael Santana", "ismael.santana@dev.com", "43807937021")]
+    [InlineData("Ismael souza da Silva Santana", "ISMAEL.SANTANA@dev.com", "685.245.620-05")]
+    public void People_Create_ShouldBeAbleToCreateAPerson(
+        string name,
+        string email,
+        string document
+    )
+    {
+        var action = () => SUT.Create(name, email, document);
+
+        action.Should().NotThrow();
+        var person = action();
+
+        person.Should().NotBeNull();
+        person.Email.Value.Should().Be(Email.Create(email).Value);
+        person.Document.Value.Should().Be(Document.Create(document).Value);
+        person.Name.Value.Should().Be(Name.From(name).Value);
     }
 }

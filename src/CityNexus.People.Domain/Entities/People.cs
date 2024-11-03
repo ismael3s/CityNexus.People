@@ -6,9 +6,9 @@ public sealed class People
 {
     public Guid Id { get; private set; }
 
-    public Name Name { get; private set; }
-    public Document Document { get; private set; }
-    public Email Email { get; private set; }
+    public Name Name { get; private set; } = default!;
+    public Document Document { get; private set; } = default!;
+    public Email Email { get; private set; } = default!;
 
     public DateTime CreatedAt { get; private set; }
 
