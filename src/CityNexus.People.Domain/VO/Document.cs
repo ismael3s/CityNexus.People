@@ -9,11 +9,11 @@ public sealed record Document(string Value, DocumentType Type)
 {
     public static Document Create(string value, DocumentType type = DocumentType.Cpf)
     {
-        var document = new Document(value, type);
         if (!IsAValidCpf(value))
         {
             throw new Exception($"The CPF is invalid");
         }
+        var document = new Document(value.Trim().Replace(".", "").Replace("-", ""), type);
         return document;
     }
 

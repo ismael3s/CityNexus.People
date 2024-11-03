@@ -1,6 +1,5 @@
 using CityNexus.People.Domain.VO;
 
-
 namespace CityNexus.People.Domain.UnitTests.VO;
 
 public sealed class DocumentTests
@@ -14,8 +13,23 @@ public sealed class DocumentTests
     [InlineData("023.412.789-20")]
     public void Document_Create_WhenInvalidDataIsPassed_ShouldThrowException(string value)
     {
-        var action = () => Document.Create(value);  
-        
+        var action = () => Document.Create(value);
+
         action.Should().Throw<Exception>().WithMessage("The CPF is invalid");
+    }
+
+    [Theory]
+    [Trait("Document - Unit", "When a valid CPF data is provided, shouldn't throws Exceptions")]
+    [InlineData("14195386080")]
+    [InlineData("44055468008")]
+    [InlineData("44055468008 ")]
+    [InlineData("709.200.460-88")]
+    [InlineData("338.124.560-01 ")]
+    public void Document_Create_ValidDataIsPassed_ShouldNotThrowsException(string value)
+    {
+        var action = () => Document.Create(value);
+
+        action.Should().NotThrow();
+        action().Value.Should().Be(value.Trim().Replace("-", "").Replace(".", ""));
     }
 }
