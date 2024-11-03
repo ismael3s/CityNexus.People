@@ -14,6 +14,12 @@ public sealed class RegisterPersonCommand(
     public async Task Handle(Input input, CancellationToken cancellationToken = default!)
     {
         var person = Person.Create(input.Name, input.Email, input.Document);
+        var personByDocument = await personRepository.FindByCpf(person.Document, cancellationToken);
+        if (personByDocument is not null)
+            throw new Exception("CPF is already in use");
+        var personByEmail = await personRepository.FindByEmail(person.Email, cancellationToken);
+        if (personByEmail is not null)
+            throw new Exception("Email is already in use");
         await personRepository.AddAsync(person, cancellationToken);
         await unitOfWork.CommitAsync(cancellationToken);
     }

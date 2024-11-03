@@ -1,5 +1,6 @@
 using CityNexus.People.Application.IntegrationTests.Common;
 using CityNexus.People.Application.People.Commands.RegisterPerson;
+using CityNexus.People.Domain.Entities;
 using CityNexus.People.Infra.Database.EF;
 using CityNexus.People.Infra.Database.EF.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,70 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
         var action = () => sut.Handle(input, CancellationToken.None);
 
         await action.Should().ThrowAsync<Exception>();
+    }
+
+    [Fact]
+    [Trait(
+        "CreatePersonCommand - Integration",
+        "Shouldn't be able to create a person when the the CPF already exists in the database"
+    )]
+    public async Task ShouldThrow_WhenDocumentIsAlreadyInUse()
+    {
+        var applicationDbContext = new ApplicationDbContext(
+            new DbContextOptionsBuilder()
+                .UseSnakeCaseNamingConvention()
+                .UseNpgsql(setup.ConnectionString)
+                .Options
+        );
+        await applicationDbContext.Database.EnsureCreatedAsync();
+        var unitOfWork = new UnitOfWork(applicationDbContext);
+        var personRepository = new PersonRepository(applicationDbContext);
+        var person = Person.Create("Ismael Souza", "ismael@gmail.com", "57075723090");
+        applicationDbContext.People.Add(person);
+        await applicationDbContext.SaveChangesAsync();
+
+        var sut = new RegisterPersonCommand(personRepository, unitOfWork);
+        var input = new RegisterPersonCommand.Input(
+            "Ismael Souza",
+            "ismael@gmail.com",
+            "57075723090"
+        );
+
+        var action = () => sut.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<Exception>().WithMessage("Cpf is already in use");
+    }
+
+    [Fact]
+    [Trait(
+        "CreatePersonCommand - Integration",
+        "Shouldn't be able to create a person when the the Email already exists in the database"
+    )]
+    public async Task ShouldThrow_WhenEmailIsAlreadyInUse()
+    {
+        var applicationDbContext = new ApplicationDbContext(
+            new DbContextOptionsBuilder()
+                .UseSnakeCaseNamingConvention()
+                .UseNpgsql(setup.ConnectionString)
+                .Options
+        );
+        await applicationDbContext.Database.EnsureCreatedAsync();
+        var unitOfWork = new UnitOfWork(applicationDbContext);
+        var personRepository = new PersonRepository(applicationDbContext);
+        var person = Person.Create("Ismael Souza", "ismael@gmail.com", "57075723090");
+        applicationDbContext.People.Add(person);
+        await applicationDbContext.SaveChangesAsync();
+
+        var sut = new RegisterPersonCommand(personRepository, unitOfWork);
+        var input = new RegisterPersonCommand.Input(
+            "Ismael Souza",
+            "ismael@gmail.com",
+            "35381884087"
+        );
+
+        var action = () => sut.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<Exception>().WithMessage("Email is already in use");
     }
 
     [Fact]
