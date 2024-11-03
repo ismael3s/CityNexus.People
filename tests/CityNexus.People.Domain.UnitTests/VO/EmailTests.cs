@@ -16,4 +16,16 @@ public sealed class EmailTests
 
         action.Should().Throw<Exception>().WithMessage("Invalid email address.");
     }
+
+    [Theory]
+    [Trait("Email - Unit Tests", "When valid email is provided, shouldn't throw an exception")]
+    [InlineData("ismael@gmail.com")]
+    [InlineData("TESTE@gmail.com ")]
+    public void Email_Create_WhenAnValidEmail_ShouldNotThrowAnException(string value)
+    {
+        var action = () => Email.Create(value);
+
+        action.Should().NotThrow();
+        action().Value.Should().Be(value.Trim().ToLower());
+    }
 }
