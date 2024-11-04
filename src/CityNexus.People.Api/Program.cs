@@ -1,20 +1,17 @@
+using CityNexus.People.Application.Extensions;
+using CityNexus.People.Application.People.Commands.RegisterPerson;
+using CityNexus.People.Application.People.Queries.FindPeople;
 using CityNexus.People.Infra.Database.EF;
+using CityNexus.People.Infra.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+var configuration = builder.Configuration;
 builder.Services.AddEndpointsApiExplorer();
-builder
-    .Services.AddSwaggerGen()
-    .AddDbContext<ApplicationDbContext>(o =>
-        o.UseNpgsql("User ID=root;Password=root;Host=localhost;Port=5432;Database=citynexus;")
-    );
+builder.Services.AddSwaggerGen().AddInfra(configuration).AddApplication();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -23,41 +20,26 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing",
-    "Bracing",
-    "Chilly",
-    "Cool",
-    "Mild",
-    "Warm",
-    "Balmy",
-    "Hot",
-    "Sweltering",
-    "Scorching",
-};
-
 app.MapGet(
-        "/weatherforecast",
-        () =>
-        {
-            var forecast = Enumerable
-                .Range(1, 5)
-                .Select(index => new WeatherForecast(
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-                .ToArray();
-            return forecast;
-        }
-    )
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
+    "/people",
+    async (FindPeopleQueryHandler queryHandler, CancellationToken cancellationToken) =>
+    {
+        var result = await queryHandler.Handle(new(), cancellationToken);
+        return Results.Ok(result);
+    }
+);
+
+app.MapPost(
+    "/people",
+    async (
+        RegisterPersonCommand.Input input,
+        RegisterPersonCommand command,
+        CancellationToken cancellationToken
+    ) =>
+    {
+        await command.Handle(input, cancellationToken);
+        return Results.NoContent();
+    }
+);
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
