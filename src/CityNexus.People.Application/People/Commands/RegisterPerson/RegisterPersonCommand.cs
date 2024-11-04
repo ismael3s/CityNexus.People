@@ -1,4 +1,4 @@
-using CityNexus.People.Application.People.Gateways;
+using CityNexus.People.Application.Abstractions;
 using CityNexus.People.Application.People.Repositories;
 using CityNexus.People.Domain.People;
 

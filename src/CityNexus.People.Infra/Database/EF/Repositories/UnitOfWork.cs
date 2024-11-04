@@ -1,4 +1,4 @@
-using CityNexus.People.Application.People.Gateways;
+using CityNexus.People.Application.Abstractions;
 
 namespace CityNexus.People.Infra.Database.EF.Repositories;
 

@@ -1,4 +1,4 @@
-namespace CityNexus.People.Application.People.Gateways;
+namespace CityNexus.People.Application.Abstractions;
 
 public interface IUnitOfWork
 {
