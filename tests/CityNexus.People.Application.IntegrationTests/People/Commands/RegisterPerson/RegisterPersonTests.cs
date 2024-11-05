@@ -7,6 +7,7 @@ using CityNexus.People.Domain.People.Events;
 using CityNexus.People.Infra.Database.EF;
 using CityNexus.People.Infra.Database.EF.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CityNexus.People.Application.IntegrationTests.People.Commands.RegisterPerson;
 
@@ -31,7 +32,11 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
         await applicationDbContext.Database.EnsureCreatedAsync();
         var unitOfWork = new UnitOfWork(applicationDbContext);
         var personRepository = new PersonRepository(applicationDbContext);
-        var sut = new RegisterPersonCommand(personRepository, unitOfWork);
+        var sut = new RegisterPersonCommand(
+            personRepository,
+            unitOfWork,
+            NullLogger<RegisterPersonCommand>.Instance
+        );
         return (sut, applicationDbContext);
     }
 
