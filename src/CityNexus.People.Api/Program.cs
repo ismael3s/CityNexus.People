@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpLogging(_ => { });
 builder.Services.AddSwaggerGen().AddInfra(configuration).AddApplication();
 
 var app = builder.Build();
@@ -18,6 +19,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpLogging();
 app.UseHttpsRedirection();
 
 app.MapGet(
