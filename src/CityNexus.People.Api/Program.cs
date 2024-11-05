@@ -18,28 +18,8 @@ builder.Logging.AddOpenTelemetry(o =>
 {
     o.IncludeScopes = true;
     o.IncludeFormattedMessage = true;
-    o.SetResourceBuilder(
-            ResourceBuilder
-                .CreateDefault()
-                .AddService(
-                    configuration.GetValue<string>("Telemetry:ServiceName", "CityNexus.People.Api"),
-                    serviceVersion: configuration.GetValue<string>(
-                        "Telemetry:ServiceVersion",
-                        "0.0.1"
-                    )
-                )
-        )
-        .AddConsoleExporter()
-        .AddOtlpExporter(exporter =>
-        {
-            exporter.Endpoint = new Uri(
-                configuration.GetValue<string>(
-                    "Telemetry:ExporterUrl",
-                    "http://localhost:5341/ingest/otlp/v1/logs"
-                )
-            );
-            exporter.Protocol = OtlpExportProtocol.HttpProtobuf;
-        });
+    o.ParseStateValues = true;
+    o.AddConsoleExporter().AddOtlpExporter();
 });
 
 var app = builder.Build();

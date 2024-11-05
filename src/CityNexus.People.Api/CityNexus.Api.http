@@ -10,7 +10,7 @@ POST {{ApiURL}}/people
 Content-Type: application/json
 
 {
-  "name": "Leonardo Souza da Silva Santana",
-  "email": "souz4leonardo@gmail.com",
-  "document": "82583787080"
+  "name": "John",
+  "email": "{{$random.email}}",
+  "document": "01232044024"
 }

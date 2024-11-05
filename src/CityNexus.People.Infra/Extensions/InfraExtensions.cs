@@ -42,10 +42,10 @@ public static class InfraExtensions
     )
     {
         var serviceName = configuration.GetValue<string>(
-            "Telemetry:ServiceName",
+            "OTEL:SERVICE:NAME",
             "CityNexus.People.Api"
         );
-        var serviceVersion = configuration.GetValue<string>("Telemetry:ServiceVersion", "0.0.1");
+        var serviceVersion = configuration.GetValue<string>("OTEL:SERVICE:VERSION", "0.0.1");
         services
             .AddOpenTelemetry()
             .ConfigureResource(r =>
