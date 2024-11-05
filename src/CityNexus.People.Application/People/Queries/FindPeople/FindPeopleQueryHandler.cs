@@ -15,7 +15,7 @@ public sealed class FindPeopleQueryHandler(ISqlConnectionFactory sqlConnectionFa
 
         public string Email { get; init; } = default!;
 
-        public DateTime CreatedAt { get; init; } = default;
+        public DateTime CreatedAt { get; init; }
     }
 
     public async Task<Pagination<Output>> Handle(
@@ -32,13 +32,18 @@ public sealed class FindPeopleQueryHandler(ISqlConnectionFactory sqlConnectionFa
             FROM person
             WHERE 1=1
             ORDER BY id ASC
-            OFFSET {skip}
-            LIMIT {take}
+            OFFSET @Skip
+            LIMIT @Take
             """;
-        var result = await connection.QueryAsync<Output>(query, cancellationToken);
+        var result = await connection.QueryAsync<Output>(
+            new CommandDefinition(
+                query,
+                new { Skip = skip, Take = take },
+                cancellationToken: cancellationToken
+            )
+        );
         var count = await connection.ExecuteScalarAsync<int>(
-            "SELECT count(*) from person",
-            cancellationToken
+            new CommandDefinition(query, cancellationToken: cancellationToken)
         );
         return Pagination<Output>.Create(count, input.PageNumber, take, result.ToList());
     }
