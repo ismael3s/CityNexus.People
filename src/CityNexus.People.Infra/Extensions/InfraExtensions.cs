@@ -27,6 +27,7 @@ public static class InfraExtensions
         SqlMapper.AddTypeHandler(new DateTimeTypeHandler());
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
         ConfigureOptions(services, configuration);
+        AddTelemetry(services, configuration);
         services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(connectionString));
         services.AddSingleton<ISqlConnectionFactory>(_ => new SqlConnectionFactory(
             connectionString
@@ -36,7 +37,7 @@ public static class InfraExtensions
         return services;
     }
 
-    internal static IServiceCollection AddTelemetry(
+    private static IServiceCollection AddTelemetry(
         IServiceCollection services,
         IConfiguration configuration
     )
@@ -51,9 +52,15 @@ public static class InfraExtensions
             .ConfigureResource(r =>
                 r.AddService(serviceName: serviceName, serviceVersion: serviceVersion)
             )
-            .WithMetrics(metrics => metrics.AddMeter(serviceName).AddConsoleExporter())
+            .WithMetrics(metrics =>
+                metrics.AddMeter(serviceName).AddConsoleExporter().AddOtlpExporter()
+            )
             .WithTracing(tracing =>
-                tracing.AddSource(serviceName).AddAspNetCoreInstrumentation().AddConsoleExporter()
+                tracing
+                    .AddSource(serviceName)
+                    .AddAspNetCoreInstrumentation()
+                    .AddConsoleExporter()
+                    .AddOtlpExporter()
             );
         return services;
     }
