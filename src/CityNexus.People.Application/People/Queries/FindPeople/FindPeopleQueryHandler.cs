@@ -32,11 +32,15 @@ public sealed class FindPeopleQueryHandler(ISqlConnectionFactory sqlConnectionFa
             FROM person
             WHERE 1=1
             ORDER BY id ASC
-            OFFSET {skip}
-            LIMIT {take}
+            OFFSET @Skip
+            LIMIT @Take
             """;
         var result = await connection.QueryAsync<Output>(
-            new CommandDefinition(query, cancellationToken: cancellationToken)
+            new CommandDefinition(
+                query,
+                parameters: new { Skip = skip, Take = take },
+                cancellationToken: cancellationToken
+            )
         );
         var count = await connection.ExecuteScalarAsync<int>(
             new CommandDefinition(
