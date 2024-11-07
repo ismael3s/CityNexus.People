@@ -8,22 +8,21 @@ public sealed class Outbox
 
     public string Payload { get; private set; } = string.Empty;
 
+    public string? Error { get; private set; }
+
     public DateTime CreatedAt { get; private set; }
 
     public DateTime? ProcessedAt { get; private set; }
 
-    // private Outbox()
-    // {
-    // }
-
     private Outbox() { }
 
-    public Outbox(string name, string payload)
+    public Outbox(string name, string payload, string? error = null)
     {
         Id = Guid.NewGuid();
         EventName = name;
         Payload = payload;
         CreatedAt = DateTime.UtcNow;
+        Error = error;
     }
 
     public void MarkAsProcessed()
