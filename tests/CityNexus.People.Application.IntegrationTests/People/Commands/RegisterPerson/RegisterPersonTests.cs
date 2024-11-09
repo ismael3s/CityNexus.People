@@ -8,6 +8,8 @@ using CityNexus.People.Infra.Database.EF;
 using CityNexus.People.Infra.Database.EF.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace CityNexus.People.Application.IntegrationTests.People.Commands.RegisterPerson;
 
@@ -134,9 +136,16 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
         outboxEvent
             .Payload.Should()
             .Be(
-                JsonSerializer.Serialize(
-                    new RegisteredPersonDomainEvent(person.Id),
-                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                JsonConvert.SerializeObject(
+                    new RegisteredPersonDomainEvent(
+                        person.Id,
+                        [new("name", "Ismael Souza"), new("email", "ismael@gmail.com")]
+                    ),
+                    new JsonSerializerSettings()
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                        TypeNameHandling = TypeNameHandling.All,
+                    }
                 )
             );
     }

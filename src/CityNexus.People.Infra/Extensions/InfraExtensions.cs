@@ -1,16 +1,22 @@
 using CityNexus.People.Application.Abstractions;
+using CityNexus.People.Application.People.Commands.RegisterPerson;
 using CityNexus.People.Application.People.Repositories;
+using CityNexus.People.Domain.People.Events;
 using CityNexus.People.Infra.Configuration;
 using CityNexus.People.Infra.Database.Dapper;
 using CityNexus.People.Infra.Database.EF;
 using CityNexus.People.Infra.Database.EF.Repositories;
+using CityNexus.People.Infra.OutboxMessage;
 using Dapper;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Quartz;
+using RabbitMQ.Client;
 
 namespace CityNexus.People.Infra.Extensions;
 
@@ -24,16 +30,12 @@ public static class InfraExtensions
         var connectionString =
             configuration.GetConnectionString("DefaultConnection")
             ?? throw new ArgumentNullException(nameof(configuration));
-        SqlMapper.AddTypeHandler(new DateTimeTypeHandler());
-        Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
         ConfigureOptions(services, configuration);
         AddTelemetry(services, configuration);
-        services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(connectionString));
-        services.AddSingleton<ISqlConnectionFactory>(_ => new SqlConnectionFactory(
-            connectionString
-        ));
-        services.AddScoped<IPersonRepository, PersonRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>().AddOpenTelemetry();
+        AddDatabase(services, connectionString);
+        AddRepositoriesImplementation(services);
+        AddBackgroundJobs(services, configuration);
+        AddMassTransit(services, configuration);
         return services;
     }
 
@@ -71,6 +73,80 @@ public static class InfraExtensions
     )
     {
         services.Configure<TelemetryConfigurationOption>(configuration.GetSection("Telemetry"));
+        services.Configure<RabbitMqConfiguration>(configuration.GetSection("RabbitMq"));
         return services;
+    }
+
+    private static void AddRepositoriesImplementation(IServiceCollection services)
+    {
+        services.AddScoped<IPersonRepository, PersonRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>().AddOpenTelemetry();
+    }
+
+    private static void AddDatabase(IServiceCollection services, string connectionString)
+    {
+        SqlMapper.AddTypeHandler(new DateTimeTypeHandler());
+        Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+        services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(connectionString));
+        services.AddSingleton<ISqlConnectionFactory>(_ => new SqlConnectionFactory(
+            connectionString
+        ));
+    }
+
+    private static void AddBackgroundJobs(IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddQuartz()
+            .AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true)
+            .ConfigureOptions<ProcessOutboxJobSetup>();
+    }
+
+    private static void AddMassTransit(IServiceCollection services, IConfiguration configuration)
+    {
+        var rabbitmqCfg = configuration.GetSection("RabbitMq").Get<RabbitMqConfiguration>();
+        services.AddMassTransit(x =>
+        {
+            x.AddConfigureEndpointsCallback(
+                (context, name, cfg) =>
+                {
+                    cfg.UseMessageRetry(r =>
+                        r.Exponential(
+                            5,
+                            TimeSpan.FromSeconds(10),
+                            TimeSpan.FromMinutes(2),
+                            TimeSpan.FromSeconds(10)
+                        )
+                    );
+                }
+            );
+            x.UsingRabbitMq(
+                (context, cfg) =>
+                {
+                    cfg.Host(
+                        rabbitmqCfg!.Host,
+                        rabbitmqCfg.Port,
+                        rabbitmqCfg.VHost,
+                        hostCfg =>
+                        {
+                            hostCfg.Username(rabbitmqCfg.Username);
+                            hostCfg.Password(rabbitmqCfg.Password);
+                        }
+                    );
+                    cfg.Message<RegisteredPersonDomainEvent>(cfg =>
+                    {
+                        cfg.SetEntityName("person.registered");
+                    });
+                    cfg.Publish<RegisteredPersonDomainEvent>(cfg =>
+                    {
+                        cfg.ExchangeType = ExchangeType.Fanout;
+                        cfg.Durable = true;
+                        cfg.BindQueue("person.registered", "person.registered.notifications");
+                        cfg.BindQueue("person.registered", "person.registered.contracts");
+                    });
+
+                    cfg.ConfigureEndpoints(context);
+                }
+            );
+        });
     }
 }

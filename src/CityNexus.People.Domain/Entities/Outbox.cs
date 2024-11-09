@@ -24,9 +24,4 @@ public sealed class Outbox
         CreatedAt = DateTime.UtcNow;
         Error = error;
     }
-
-    public void MarkAsProcessed()
-    {
-        ProcessedAt = DateTime.UtcNow;
-    }
 }

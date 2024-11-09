@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <PackageReference Include="EntityFrameworkCore.NamingConventions" Version="8.0.0" />
+      <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
@@ -20,6 +21,7 @@
       <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0-rc.1" />
       <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0-rc.1" />
       <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+      <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.1" />
     </ItemGroup>
 
 </Project>

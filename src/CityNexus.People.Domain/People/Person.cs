@@ -19,16 +19,22 @@ public sealed class Person : Entity
     {
         var document = Document.Create(cpf);
         var email = Email.Create(anEmail);
+        var name = Name.From(fullName);
         var person = new Person
         {
             Id = Guid.NewGuid(),
-            Name = Name.From(fullName),
+            Name = name,
             Document = document,
             Email = email,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
-        person.RaiseDomainEvent(new RegisteredPersonDomainEvent(person.Id));
+        person.RaiseDomainEvent(
+            new RegisteredPersonDomainEvent(
+                person.Id,
+                [new("name", name.Value), new("email", email.Value)]
+            )
+        );
         return person;
     }
 }

@@ -49,12 +49,10 @@ public sealed class ApplicationDbContext(DbContextOptions options) : DbContext(o
                 domainEvent.GetType().Name,
                 JsonConvert.SerializeObject(
                     domainEvent,
-                    new JsonSerializerSettings()
+                    new JsonSerializerSettings
                     {
-                        ContractResolver = new DefaultContractResolver()
-                        {
-                            NamingStrategy = new CamelCaseNamingStrategy(),
-                        },
+                        TypeNameHandling = TypeNameHandling.All,
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
                     }
                 )
             ))

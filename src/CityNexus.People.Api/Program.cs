@@ -1,13 +1,8 @@
 using CityNexus.People.Application.Extensions;
 using CityNexus.People.Application.People.Commands.RegisterPerson;
 using CityNexus.People.Application.People.Queries.FindPeople;
-using CityNexus.People.Infra.Database.EF;
 using CityNexus.People.Infra.Extensions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
-using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
