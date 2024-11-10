@@ -138,7 +138,8 @@ public sealed class RegisterPersonTests(IntegrationTestSetup setup) : IAsyncLife
             .Be(
                 JsonConvert.SerializeObject(
                     new RegisteredPersonDomainEvent(
-                        person.Id,
+                        Id: person.Id,
+                        To: person.Email.Value,
                         [new("name", "Ismael Souza"), new("email", "ismael@gmail.com")]
                     ),
                     new JsonSerializerSettings()

@@ -136,11 +136,29 @@ public static class InfraExtensions
                     {
                         cfg.SetEntityName("person.registered");
                     });
+                    MessageCorrelation.UseCorrelationId<RegisteredPersonDomainEvent>(@event =>
+                        @event.Id
+                    );
                     cfg.Publish<RegisteredPersonDomainEvent>(cfg =>
                     {
                         cfg.ExchangeType = ExchangeType.Fanout;
                         cfg.Durable = true;
-                        cfg.BindQueue("person.registered", "person.registered.notifications");
+
+                        cfg.BindQueue(
+                            "person.registered",
+                            "person.registered.notifications",
+                            que =>
+                            {
+                                que.SetQueueArgument(
+                                    "x-dead-letter-exchange",
+                                    "dlq.person.registered"
+                                );
+                                que.SetQueueArgument(
+                                    "x-dead-letter-routing-key",
+                                    "dlq.person.registered.notifications"
+                                );
+                            }
+                        );
                         cfg.BindQueue("person.registered", "person.registered.contracts");
                     });
 

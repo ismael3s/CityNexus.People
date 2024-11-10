@@ -6,11 +6,31 @@ Accept: application/json
 ###
 
 
+< {%
+    request.variables.set("clients", [ // test data
+        { "name": "Maria", "email": "maria@example.com", "document": "77626736010" },
+        { "name": "Lucas", "email": "lucas@example.com", "document": "08305030059" },
+        { "name": "Ana", "email": "ana@example.com", "document": "56181549005" },
+        { "name": "Pedro", "email": "pedro@example.com", "document": "20148208053" },
+        { "name": "Carlos", "email": "carlos@example.com", "document": "94653367000" },
+        { "name": "Gabriela", "email": "gabriela@example.com", "document": "30174553005" },
+        { "name": "Juliana", "email": "juliana@example.com", "document": "13503303022" },
+        { "name": "Felipe", "email": "felipe@example.com", "document": "06511281027" },
+        { "name": "Beatriz", "email": "beatriz@example.com", "document": "09792566074" },
+        { "name": "Raul", "email": "raul@example.com", "document": "14266129076" },
+        { "name": "Isabela", "email": "isabela@example.com", "document": "65194311095" },
+        { "name": "Gustavo", "email": "gustavo@example.com", "document": "45446805062" },
+        { "name": "Ricardo", "email": "ricardo@example.com", "document": "67377848014" },
+    ])
+%}
+
 POST {{ApiURL}}/people
 Content-Type: application/json
 
 {
-  "name": "John",
-  "email": "{{$random.email}}",
-  "document": "01232044024"
+  "name": "{{$.clients..name}}",
+  "email": "{{$.clients..email}}",
+  "document": "{{$.clients..document}}"
 }
+
+

@@ -31,7 +31,8 @@ public sealed class Person : Entity
         };
         person.RaiseDomainEvent(
             new RegisteredPersonDomainEvent(
-                person.Id,
+                Id: person.Id,
+                To: person.Email.Value,
                 [new("name", name.Value), new("email", email.Value)]
             )
         );
