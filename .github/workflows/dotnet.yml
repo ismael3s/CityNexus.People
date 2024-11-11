@@ -55,4 +55,4 @@ jobs:
             ismael3s/citynexus.people:latest
             ismael3s/citynexus.people:${{ steps.vars.outputs.sha_short }}
           context: .
-          file: ./Dockerfile
+          file: ./src/CityNexus.People.Api/Dockerfile
