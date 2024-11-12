@@ -83,3 +83,4 @@ jobs:
           github_token: ${{ secrets.CI_TOKEN }}
           branch: main
           repository: ismael3s/CityNexus.K8S
+          message: "Update CityNexus.People image to $DOCKER_IMAGE"
