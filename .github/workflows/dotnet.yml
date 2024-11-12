@@ -5,25 +5,25 @@ name: .NET
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
   push_to_registry:
     needs: test
     runs-on: ubuntu-latest
@@ -56,3 +56,30 @@ jobs:
             ismael3s/citynexus.people:${{ steps.vars.outputs.sha_short }}
           context: .
           file: ./src/CityNexus.People.Api/Dockerfile
+  update_k8s:
+    permissions:
+      contents: write
+    needs: push_to_registry
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: ismael3s/citynexus.people:${{ needs.push_to_registry.outputs.sha_short }}
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ismael3s/CityNexus.K8S
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Update Image Deployment
+        run: |
+          wget https://github.com/mikefarah/yq/releases/download/v4.13.5/yq_darwin_amd64.tar.gz -O yq_darwin_amd64.tar.gz && tar -xvf yq_darwin_amd64.tar.gz && chmod +x yq_darwin_amd64 && mv yq_darwin_amd64 yq
+          yq e '.spec.template.spec.containers[0].image = env(DOCKER_IMAGE)' -i CityNexus.People/deployment.yml
+          rm -f yq yq.1 install-man-page.sh yq_darwin_amd64.tar.gz
+      - name: Commit and push the changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.CI_TOKEN }}
+          branch: main
+          repository: ismael3s/CityNexus.K8S
